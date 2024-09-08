@@ -162,4 +162,5 @@ public class GetUserListTest {
         Assert.assertEquals(dataItemResponse.getFirstName(), "Charles");
 
     }
+
 }
