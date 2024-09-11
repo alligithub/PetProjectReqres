@@ -1,8 +1,8 @@
 package com.petProject.api.test.getUserController;
 
 import com.petProject.api.asserts.getUserListAssert.GetUserListAssert;
-import com.petProject.api.models.getUsersList.DataItem;
-import com.petProject.api.models.getUsersList.GetUsersListModel;
+import com.petProject.api.models.getUsersListModel.response.DataItem;
+import com.petProject.api.models.getUsersListModel.response.GetUsersListResponseModel;
 import com.petProject.api.services.userControllerServices.UserControllerService;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -12,155 +12,198 @@ import java.util.List;
 
 import static com.petProject.api.conditions.Conditions.bodyField;
 import static com.petProject.api.conditions.Conditions.statusCode;
+import static com.petProject.api.properties.BaseUserFirstPageProperties.*;
+import static com.petProject.api.properties.BaseUserSecondPageProperties.BASE_georgeEdwardsEmail;
+import static com.petProject.api.properties.BaseUserSecondPageProperties.BASE_georgeEdwardsId;
 import static org.hamcrest.Matchers.*;
 
 public class GetUserListTest {
 
-    private String georgeBluthEmail = "george.bluth@reqres.in";
+    private int firstPage = 1;
+    private int secondPage = 2;
 
     private UserControllerService userController = new UserControllerService();
     private GetUserListAssert getUserListAssert = new GetUserListAssert();
 
     @Test
-    void getUserListAndCheckBodyFields() {
+    void getUserListFirstPageAndCheckWithAssertToClass() {
+
+        GetUsersListResponseModel getUsersListResponseModel = userController
+                .getUserListByPage(firstPage)
+                .shouldHave(statusCode(200))
+                .responseAs(GetUsersListResponseModel.class);
+
+        getUserListAssert.getUserListFirstPageAssert(getUsersListResponseModel);
+    }
+
+    @Test
+    void getUserListSecondPageAndCheckWithAssertToClass() {
+
+        GetUsersListResponseModel getUsersListResponseModel = userController
+                .getUserListByPage(secondPage)
+                .shouldHave(statusCode(200))
+                .responseAs(GetUsersListResponseModel.class);
+
+        getUserListAssert.getUserListSecondPageAssert(getUsersListResponseModel);
+    }
+
+    @Test
+    void getUserListFirstPageAndCheckWithStreamByEmail() {
+
+        GetUsersListResponseModel getUsersListResponseModel = userController
+                .getUserListByPage(firstPage)
+                .shouldHave(statusCode(200))
+                .responseAs(GetUsersListResponseModel.class);
+
+        DataItem dataItemResponse =
+                getUsersListResponseModel.getData().stream().filter(email -> email.getEmail().equals(BASE_georgeBluthEmail)).findAny().get();
+
+        Assert.assertEquals(dataItemResponse.getEmail(), BASE_georgeBluthEmail);
+    }
+
+    @Test
+    void getUserListSecondPageAndCheckWithStreamByEmail() {
+
+        GetUsersListResponseModel getUsersListResponseModel = userController
+                .getUserListByPage(secondPage)
+                .shouldHave(statusCode(200))
+                .responseAs(GetUsersListResponseModel.class);
+
+        DataItem dataItemResponse =
+                getUsersListResponseModel.getData().stream().filter(email -> email.getEmail().equals(BASE_georgeEdwardsEmail)).findAny().get();
+
+        Assert.assertEquals(dataItemResponse.getEmail(), BASE_georgeEdwardsEmail);
+    }
+
+    @Test
+    void getUserListFirstPageAndCheckWithStreamById() {
+
+        GetUsersListResponseModel getUsersListResponseModel = userController
+                .getUserListByPage(firstPage)
+                .shouldHave(statusCode(200))
+                .responseAs(GetUsersListResponseModel.class);
+
+        DataItem dataItemResponse =
+                getUsersListResponseModel.getData().stream().filter(message -> Integer.toString(message.getId()).equals(String.valueOf(BASE_charlesMorrisId))).findAny().get();
+
+        Assert.assertEquals(dataItemResponse.getFirstName(), BASE_charlesMorrisFirstName);
+    }
+
+    @Test
+    void getUserListSecondPageAndCheckWithStreamById() {
+
+        GetUsersListResponseModel getUsersListResponseModel = userController
+                .getUserListByPage(secondPage)
+                .shouldHave(statusCode(200))
+                .responseAs(GetUsersListResponseModel.class);
+
+        DataItem dataItemResponse =
+                getUsersListResponseModel.getData().stream().filter(message -> Integer.toString(message.getId()).equals(String.valueOf(BASE_georgeEdwardsId))).findAny().get();
+
+        Assert.assertEquals(dataItemResponse.getId(), BASE_georgeEdwardsId);
+    }
+
+    @Test
+    void getUserListFirstPageAndCheckBodyFields() {
         userController
-                .getUser()
+                .getUserListByPage(firstPage)
                 .shouldHave(statusCode(200),
-                        bodyField("page", is(1)),
+                        bodyField("page", is(firstPage)),
                         bodyField("per_page", is(6)),
                         bodyField("total", is(12)),
                         bodyField("total_pages", is(2)),
 
                         bodyField("data[0].id", is(1)),
-                        bodyField("data[0].email", containsString(georgeBluthEmail)),
-                        bodyField("data[0].first_name", containsString("George")),
-                        bodyField("data[0].last_name", containsString("Bluth")),
-                        bodyField("data[0].avatar", containsString("https://reqres.in/img/faces/1-image.jpg")),
+                        bodyField("data[0].email", containsString(BASE_georgeBluthEmail)),
+                        bodyField("data[0].first_name", containsString(BASE_georgeBluthFirstName)),
+                        bodyField("data[0].last_name", containsString(BASE_georgeBluthLastName)),
+                        bodyField("data[0].avatar", containsString(BASE_georgeBluthAvatar)),
 
                         bodyField("data[1].id", is(2)),
-                        bodyField("data[1].email", containsString("janet.weaver@reqres.in")),
+                        bodyField("data[1].email", containsString(BASE_janetWeaverEmail)),
+                        bodyField("data[1].first_name", containsString(BASE_janetWeaverFirstName)),
+                        bodyField("data[1].last_name", containsString(BASE_janetWeaverLastName)),
+                        bodyField("data[1].avatar", containsString(BASE_janetWeaverAvatar)),
 
-                        bodyField("support.url", containsString("https://reqres.in/#support-heading")),
-                        bodyField("support.text", containsString("To keep ReqRes free, contributions towards server costs are appreciated!")));
-
+                        bodyField("support.url", containsString(BASE_supportUrl)),
+                        bodyField("support.text", containsString(BASE_supportText)));
     }
 
     @Test
-    void getUserListAndCheckWithAssert() {
+    void getUserListFirstPageAndCheckWithAssert() {
 
-        GetUsersListModel getUsersListModel = userController
-                .getUser()
+        GetUsersListResponseModel getUsersListResponseModel = userController
+                .getUserListByPage(firstPage)
                 .shouldHave(statusCode(200))
-                .responseAs(GetUsersListModel.class);
+                .responseAs(GetUsersListResponseModel.class);
 
-        Assert.assertEquals(getUsersListModel.getPage(), 1);
-        Assert.assertEquals(getUsersListModel.getPerPage(), 6);
-        Assert.assertEquals(getUsersListModel.getTotal(), 12);
-        Assert.assertEquals(getUsersListModel.getTotalPages(), 2);
+        Assert.assertEquals(getUsersListResponseModel.getPage(), firstPage);
+        Assert.assertEquals(getUsersListResponseModel.getPerPage(), 6);
+        Assert.assertEquals(getUsersListResponseModel.getTotal(), 12);
+        Assert.assertEquals(getUsersListResponseModel.getTotalPages(), 2);
 
-        Assert.assertEquals(getUsersListModel.getData().get(0).getId(), 1);
-        Assert.assertEquals(getUsersListModel.getData().get(0).getEmail(), georgeBluthEmail);
-        Assert.assertEquals(getUsersListModel.getData().get(0).getFirstName(), "George");
-        Assert.assertEquals(getUsersListModel.getData().get(0).getLastName(), "Bluth");
-        Assert.assertEquals(getUsersListModel.getData().get(0).getAvatar(), "https://reqres.in/img/faces/1-image.jpg");
+        Assert.assertEquals(getUsersListResponseModel.getData().get(0).getId(), 1);
+        Assert.assertEquals(getUsersListResponseModel.getData().get(0).getEmail(), BASE_georgeBluthEmail);
+        Assert.assertEquals(getUsersListResponseModel.getData().get(0).getFirstName(), BASE_georgeBluthFirstName);
+        Assert.assertEquals(getUsersListResponseModel.getData().get(0).getLastName(), BASE_georgeBluthLastName);
+        Assert.assertEquals(getUsersListResponseModel.getData().get(0).getAvatar(), BASE_georgeBluthAvatar);
 
-        Assert.assertEquals(getUsersListModel.getData().get(1).getId(), 2);
-        Assert.assertEquals(getUsersListModel.getData().get(1).getEmail(), "janet.weaver@reqres.in");
+        Assert.assertEquals(getUsersListResponseModel.getData().get(1).getId(), 2);
+        Assert.assertEquals(getUsersListResponseModel.getData().get(1).getEmail(), BASE_janetWeaverEmail);
+        Assert.assertEquals(getUsersListResponseModel.getData().get(1).getFirstName(), BASE_janetWeaverFirstName);
+        Assert.assertEquals(getUsersListResponseModel.getData().get(1).getLastName(), BASE_janetWeaverLastName);
+        Assert.assertEquals(getUsersListResponseModel.getData().get(1).getAvatar(), BASE_janetWeaverAvatar);
 
-        Assert.assertEquals(getUsersListModel.getSupport().getUrl(), "https://reqres.in/#support-heading");
-        Assert.assertEquals(getUsersListModel.getSupport().getText(),"To keep ReqRes free, contributions towards server costs are appreciated!");
 
+        Assert.assertEquals(getUsersListResponseModel.getSupport().getUrl(), BASE_supportUrl);
+        Assert.assertEquals(getUsersListResponseModel.getSupport().getText(), BASE_supportText);
     }
 
     @Test
-    void getUserListAndCheckWithSoftAssert() {
+    void getUserListFirstPageAndCheckWithSoftAssert() {
 
-        GetUsersListModel getUsersListModel = userController
-                .getUser()
+        GetUsersListResponseModel getUsersListResponseModel = userController
+                .getUserListByPage(firstPage)
                 .shouldHave(statusCode(200))
-                .responseAs(GetUsersListModel.class);
+                .responseAs(GetUsersListResponseModel.class);
 
         SoftAssert softAssert = new SoftAssert();
 
-        softAssert.assertEquals(getUsersListModel.getPage(), 1);
-        softAssert.assertEquals(getUsersListModel.getPerPage(), 6);
-        softAssert.assertEquals(getUsersListModel.getTotal(), 12);
-        softAssert.assertEquals(getUsersListModel.getTotalPages(), 2);
+        softAssert.assertEquals(getUsersListResponseModel.getPage(), firstPage);
+        softAssert.assertEquals(getUsersListResponseModel.getPerPage(), 6);
+        softAssert.assertEquals(getUsersListResponseModel.getTotal(), 12);
+        softAssert.assertEquals(getUsersListResponseModel.getTotalPages(), 2);
 
-        softAssert.assertEquals(getUsersListModel.getData().get(0).getId(), 1);
-        softAssert.assertEquals(getUsersListModel.getData().get(0).getEmail(), georgeBluthEmail);
-        softAssert.assertEquals(getUsersListModel.getData().get(0).getFirstName(), "George");
-        softAssert.assertEquals(getUsersListModel.getData().get(0).getLastName(), "Bluth");
-        softAssert.assertEquals(getUsersListModel.getData().get(0).getAvatar(), "https://reqres.in/img/faces/1-image.jpg");
+        softAssert.assertEquals(getUsersListResponseModel.getData().get(0).getId(), 1);
+        softAssert.assertEquals(getUsersListResponseModel.getData().get(0).getEmail(), BASE_georgeBluthEmail);
+        softAssert.assertEquals(getUsersListResponseModel.getData().get(0).getFirstName(), BASE_georgeBluthFirstName);
+        softAssert.assertEquals(getUsersListResponseModel.getData().get(0).getLastName(), BASE_georgeBluthLastName);
+        softAssert.assertEquals(getUsersListResponseModel.getData().get(0).getAvatar(), BASE_georgeBluthAvatar);
 
-        softAssert.assertEquals(getUsersListModel.getData().get(1).getId(), 2);
-        softAssert.assertEquals(getUsersListModel.getData().get(1).getEmail(), "janet.weaver@reqres.in");
+        softAssert.assertEquals(getUsersListResponseModel.getData().get(1).getId(), 2);
+        softAssert.assertEquals(getUsersListResponseModel.getData().get(1).getEmail(), BASE_janetWeaverEmail);
+        softAssert.assertEquals(getUsersListResponseModel.getData().get(1).getFirstName(), BASE_janetWeaverFirstName);
+        softAssert.assertEquals(getUsersListResponseModel.getData().get(1).getLastName(), BASE_janetWeaverLastName);
+        softAssert.assertEquals(getUsersListResponseModel.getData().get(1).getAvatar(), BASE_janetWeaverAvatar);
 
-        softAssert.assertEquals(getUsersListModel.getSupport().getUrl(), "https://reqres.in/#support-heading");
-        softAssert.assertEquals(getUsersListModel.getSupport().getText(),"To keep ReqRes free, contributions towards server costs are appreciated!");
+        softAssert.assertEquals(getUsersListResponseModel.getSupport().getUrl(), BASE_supportUrl);
+        softAssert.assertEquals(getUsersListResponseModel.getSupport().getText(), BASE_supportText);
 
         softAssert.assertAll();
-
     }
 
     @Test
-    void getUserListAndCheckWithAssertToClass() {
-
-        GetUsersListModel getUsersListModel = userController
-                .getUser()
-                .shouldHave(statusCode(200))
-                .responseAs(GetUsersListModel.class);
-
-        getUserListAssert.getUserListAssert(getUsersListModel);
-
-    }
-
-    @Test
-    void getUserListAndCheckWithStreamPath() {
-
+    void getUserListFirstPageAndCheckWithStreamPath() {
 
         List<DataItem> getDataItem = userController
-                .getUser()
+                .getUserListByPage(firstPage)
                 .shouldHave(statusCode(200))
                 .responseAsList("data", DataItem.class);
 
         DataItem dataItemResponse =
-                getDataItem.stream().filter(email -> email.getEmail().equals(georgeBluthEmail)).findAny().get();
+                getDataItem.stream().filter(email -> email.getEmail().equals(BASE_georgeBluthEmail)).findAny().get();
 
-        Assert.assertEquals(dataItemResponse.getEmail(), georgeBluthEmail);
-
-    }
-
-    @Test
-    void getUserListAndCheckWithStreamByEmail() {
-
-        GetUsersListModel getUsersListModel = userController
-                .getUser()
-                .shouldHave(statusCode(200))
-                .responseAs(GetUsersListModel.class);
-
-        DataItem dataItemResponse =
-                getUsersListModel.getData().stream().filter(email -> email.getEmail().equals(georgeBluthEmail)).findAny().get();
-
-        Assert.assertEquals(dataItemResponse.getEmail(), georgeBluthEmail);
-
-    }
-
-    @Test
-    void getUserListAndCheckWithStreamById() {
-
-        GetUsersListModel getUsersListModel = userController
-                .getUser()
-                .shouldHave(statusCode(200))
-                .responseAs(GetUsersListModel.class);
-
-        DataItem dataItemResponse =
-                getUsersListModel.getData().stream().filter(message ->
-                        Integer.toString(message.getId()).equals(String.valueOf(5))).findAny().get();
-
-//        Assert.assertEquals(dataItemResponse.getId(), 5);
-        Assert.assertEquals(dataItemResponse.getFirstName(), "Charles");
-
+        Assert.assertEquals(dataItemResponse.getEmail(), BASE_georgeBluthEmail);
     }
 
 }

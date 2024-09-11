@@ -1,8 +1,7 @@
-package com.petProject.api.models.getUsersList;
+package com.petProject.api.models.getUsersListModel.response;
 
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import lombok.experimental.Accessors;
@@ -13,7 +12,7 @@ import lombok.experimental.Accessors;
 @NoArgsConstructor
 @Accessors(chain = true)
 @AllArgsConstructor
-public class GetUsersListModel{
+public class GetUsersListResponseModel {
 
     @JsonProperty("per_page")
     private int perPage;

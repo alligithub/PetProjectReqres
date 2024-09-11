@@ -1,6 +1,5 @@
-package com.petProject.api.models.getUsersList;
+package com.petProject.api.models.getUsersListModel.response;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import lombok.experimental.Accessors;
