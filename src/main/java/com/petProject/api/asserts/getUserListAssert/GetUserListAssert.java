@@ -3,10 +3,9 @@ package com.petProject.api.asserts.getUserListAssert;
 import com.petProject.api.models.getUsersListModel.response.GetUsersListResponseModel;
 import org.testng.asserts.SoftAssert;
 
-import static com.petProject.api.properties.BaseUserFirstPageProperties.*;
-import static com.petProject.api.properties.BaseUserFirstPageProperties.BASE_supportText;
-import static com.petProject.api.properties.BaseUserFirstPageProperties.BASE_supportUrl;
-import static com.petProject.api.properties.BaseUserSecondPageProperties.*;
+import static com.petProject.api.properties.BaseUserProperties.*;
+import static com.petProject.api.properties.BaseUserProperties.BASE_supportText;
+import static com.petProject.api.properties.BaseUserProperties.BASE_supportUrl;
 
 
 public class GetUserListAssert {
@@ -20,7 +19,7 @@ public class GetUserListAssert {
         softAssert.assertEquals(getUsersListResponseModel.getTotal(), 12);
         softAssert.assertEquals(getUsersListResponseModel.getTotalPages(), 2);
 
-        softAssert.assertEquals(getUsersListResponseModel.getData().get(0).getId(), 1);
+        softAssert.assertEquals(getUsersListResponseModel.getData().get(0).getId(), BASE_georgeBluthId);
         softAssert.assertEquals(getUsersListResponseModel.getData().get(0).getEmail(), BASE_georgeBluthEmail);
         softAssert.assertEquals(getUsersListResponseModel.getData().get(0).getFirstName(), BASE_georgeBluthFirstName);
         softAssert.assertEquals(getUsersListResponseModel.getData().get(0).getLastName(), BASE_georgeBluthLastName);

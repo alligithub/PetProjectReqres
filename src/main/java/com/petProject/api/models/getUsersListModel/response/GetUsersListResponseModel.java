@@ -31,4 +31,7 @@ public class GetUsersListResponseModel {
 
     @JsonProperty("support")
     private Support support;
+
+    @JsonProperty("_meta")
+    private Meta _meta;
 }

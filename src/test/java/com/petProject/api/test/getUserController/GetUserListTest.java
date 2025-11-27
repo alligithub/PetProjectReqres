@@ -12,9 +12,8 @@ import java.util.List;
 
 import static com.petProject.api.conditions.Conditions.bodyField;
 import static com.petProject.api.conditions.Conditions.statusCode;
-import static com.petProject.api.properties.BaseUserFirstPageProperties.*;
-import static com.petProject.api.properties.BaseUserSecondPageProperties.BASE_georgeEdwardsEmail;
-import static com.petProject.api.properties.BaseUserSecondPageProperties.BASE_georgeEdwardsId;
+import static com.petProject.api.properties.BaseUrlLinks.REST_FULL_API_KEY;
+import static com.petProject.api.properties.BaseUserProperties.*;
 import static org.hamcrest.Matchers.*;
 
 public class GetUserListTest {
@@ -22,14 +21,14 @@ public class GetUserListTest {
     private int firstPage = 1;
     private int secondPage = 2;
 
-    private UserControllerService userController = new UserControllerService();
+    private UserControllerService userControllerService = new UserControllerService();
     private GetUserListAssert getUserListAssert = new GetUserListAssert();
 
     @Test
     void getUserListFirstPageAndCheckWithAssertToClass() {
 
-        GetUsersListResponseModel getUsersListResponseModel = userController
-                .getUserListByPage(firstPage)
+        GetUsersListResponseModel getUsersListResponseModel = userControllerService
+                .getUserListByPage(firstPage, REST_FULL_API_KEY)
                 .shouldHave(statusCode(200))
                 .responseAs(GetUsersListResponseModel.class);
 
@@ -37,10 +36,19 @@ public class GetUserListTest {
     }
 
     @Test
+    void getUserListFirstPageWithoutToken() {
+
+        userControllerService
+                .getUserListByPage(firstPage, "")
+                .shouldHave(statusCode(401),
+                        bodyField("error_message", containsString("Error: 401")));
+    }
+
+    @Test
     void getUserListSecondPageAndCheckWithAssertToClass() {
 
-        GetUsersListResponseModel getUsersListResponseModel = userController
-                .getUserListByPage(secondPage)
+        GetUsersListResponseModel getUsersListResponseModel = userControllerService
+                .getUserListByPage(secondPage, REST_FULL_API_KEY)
                 .shouldHave(statusCode(200))
                 .responseAs(GetUsersListResponseModel.class);
 
@@ -50,8 +58,8 @@ public class GetUserListTest {
     @Test
     void getUserListFirstPageAndCheckWithStreamByEmail() {
 
-        GetUsersListResponseModel getUsersListResponseModel = userController
-                .getUserListByPage(firstPage)
+        GetUsersListResponseModel getUsersListResponseModel = userControllerService
+                .getUserListByPage(firstPage, REST_FULL_API_KEY)
                 .shouldHave(statusCode(200))
                 .responseAs(GetUsersListResponseModel.class);
 
@@ -64,8 +72,8 @@ public class GetUserListTest {
     @Test
     void getUserListSecondPageAndCheckWithStreamByEmail() {
 
-        GetUsersListResponseModel getUsersListResponseModel = userController
-                .getUserListByPage(secondPage)
+        GetUsersListResponseModel getUsersListResponseModel = userControllerService
+                .getUserListByPage(secondPage, REST_FULL_API_KEY)
                 .shouldHave(statusCode(200))
                 .responseAs(GetUsersListResponseModel.class);
 
@@ -78,8 +86,8 @@ public class GetUserListTest {
     @Test
     void getUserListFirstPageAndCheckWithStreamById() {
 
-        GetUsersListResponseModel getUsersListResponseModel = userController
-                .getUserListByPage(firstPage)
+        GetUsersListResponseModel getUsersListResponseModel = userControllerService
+                .getUserListByPage(firstPage, REST_FULL_API_KEY)
                 .shouldHave(statusCode(200))
                 .responseAs(GetUsersListResponseModel.class);
 
@@ -92,8 +100,8 @@ public class GetUserListTest {
     @Test
     void getUserListSecondPageAndCheckWithStreamById() {
 
-        GetUsersListResponseModel getUsersListResponseModel = userController
-                .getUserListByPage(secondPage)
+        GetUsersListResponseModel getUsersListResponseModel = userControllerService
+                .getUserListByPage(secondPage, REST_FULL_API_KEY)
                 .shouldHave(statusCode(200))
                 .responseAs(GetUsersListResponseModel.class);
 
@@ -105,8 +113,8 @@ public class GetUserListTest {
 
     @Test
     void getUserListFirstPageAndCheckBodyFields() {
-        userController
-                .getUserListByPage(firstPage)
+        userControllerService
+                .getUserListByPage(firstPage, REST_FULL_API_KEY)
                 .shouldHave(statusCode(200),
                         bodyField("page", is(firstPage)),
                         bodyField("per_page", is(6)),
@@ -132,8 +140,8 @@ public class GetUserListTest {
     @Test
     void getUserListFirstPageAndCheckWithAssert() {
 
-        GetUsersListResponseModel getUsersListResponseModel = userController
-                .getUserListByPage(firstPage)
+        GetUsersListResponseModel getUsersListResponseModel = userControllerService
+                .getUserListByPage(firstPage, REST_FULL_API_KEY)
                 .shouldHave(statusCode(200))
                 .responseAs(GetUsersListResponseModel.class);
 
@@ -162,8 +170,8 @@ public class GetUserListTest {
     @Test
     void getUserListFirstPageAndCheckWithSoftAssert() {
 
-        GetUsersListResponseModel getUsersListResponseModel = userController
-                .getUserListByPage(firstPage)
+        GetUsersListResponseModel getUsersListResponseModel = userControllerService
+                .getUserListByPage(firstPage, REST_FULL_API_KEY)
                 .shouldHave(statusCode(200))
                 .responseAs(GetUsersListResponseModel.class);
 
@@ -195,8 +203,8 @@ public class GetUserListTest {
     @Test
     void getUserListFirstPageAndCheckWithStreamPath() {
 
-        List<DataItem> getDataItem = userController
-                .getUserListByPage(firstPage)
+        List<DataItem> getDataItem = userControllerService
+                .getUserListByPage(firstPage, REST_FULL_API_KEY)
                 .shouldHave(statusCode(200))
                 .responseAsList("data", DataItem.class);
 
@@ -204,6 +212,11 @@ public class GetUserListTest {
                 getDataItem.stream().filter(email -> email.getEmail().equals(BASE_georgeBluthEmail)).findAny().get();
 
         Assert.assertEquals(dataItemResponse.getEmail(), BASE_georgeBluthEmail);
+    }
+
+    @Test
+    void getUserListFirstPageAndCheckWithFile(){
+        // create test to check user list from PDF, XML or JSON file
     }
 
 }

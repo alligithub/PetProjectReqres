@@ -16,7 +16,7 @@ public class Data{
     private String lastName;
 
     @JsonProperty("id")
-    private Integer id;
+    private int id;
 
     @JsonProperty("avatar")
     private String avatar;
