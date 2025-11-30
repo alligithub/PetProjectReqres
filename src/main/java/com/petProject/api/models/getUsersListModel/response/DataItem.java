@@ -4,12 +4,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import lombok.experimental.Accessors;
 
-@Getter
-@Setter
-@ToString
+
 @NoArgsConstructor
 @Accessors(chain = true)
 @AllArgsConstructor
+@Data
 //@JsonInclude(JsonInclude.Include.NON_NULL)
 public class DataItem{
 

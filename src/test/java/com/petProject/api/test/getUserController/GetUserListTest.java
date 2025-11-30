@@ -1,14 +1,23 @@
 package com.petProject.api.test.getUserController;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petProject.api.asserts.getUserListAssert.GetUserListAssert;
 import com.petProject.api.models.getUsersListModel.response.DataItem;
 import com.petProject.api.models.getUsersListModel.response.GetUsersListResponseModel;
 import com.petProject.api.services.userControllerServices.UserControllerService;
 import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import org.testng.asserts.SoftAssert;
 
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.petProject.api.conditions.Conditions.bodyField;
 import static com.petProject.api.conditions.Conditions.statusCode;
@@ -18,11 +27,24 @@ import static org.hamcrest.Matchers.*;
 
 public class GetUserListTest {
 
+    private String baseDirectory = "src/main/java/com/petProject/resources/baselines/";
     private int firstPage = 1;
+    private String firstPageFilePath = baseDirectory + "users_page1.json";
     private int secondPage = 2;
+    private String secondPageFilePath = baseDirectory + "users_page2.json";
 
     private UserControllerService userControllerService = new UserControllerService();
     private GetUserListAssert getUserListAssert = new GetUserListAssert();
+    private ObjectMapper mapper = new ObjectMapper();
+
+
+    @DataProvider(name = "userPages")
+    public Object[][] userPages() {
+        return new Object[][]{
+                {firstPage, firstPageFilePath},
+                {secondPage, secondPageFilePath}
+        };
+    }
 
     @Test
     void getUserListFirstPageAndCheckWithAssertToClass() {
@@ -41,7 +63,7 @@ public class GetUserListTest {
         userControllerService
                 .getUserListByPage(firstPage, "")
                 .shouldHave(statusCode(401),
-                        bodyField("error_message", containsString("Error: 401")));
+                        bodyField("error", containsString("Missing API key")));
     }
 
     @Test
@@ -53,6 +75,20 @@ public class GetUserListTest {
                 .responseAs(GetUsersListResponseModel.class);
 
         getUserListAssert.getUserListSecondPageAssert(getUsersListResponseModel);
+    }
+
+    @Test
+    void getUserListFirstPageAndCheckWithStreamPath() {
+
+        List<DataItem> getDataItem = userControllerService
+                .getUserListByPage(firstPage, REST_FULL_API_KEY)
+                .shouldHave(statusCode(200))
+                .responseAsList("data", DataItem.class);
+
+        DataItem dataItemResponse =
+                getDataItem.stream().filter(email -> email.getEmail().equals(BASE_georgeBluthEmail)).findAny().get();
+
+        Assert.assertEquals(dataItemResponse.getEmail(), BASE_georgeBluthEmail);
     }
 
     @Test
@@ -201,22 +237,198 @@ public class GetUserListTest {
     }
 
     @Test
-    void getUserListFirstPageAndCheckWithStreamPath() {
-
-        List<DataItem> getDataItem = userControllerService
+    public void getUserListFirstPageAndCheckWithJsonFileAndExceptions() throws Exception {
+        GetUsersListResponseModel actualResponse = userControllerService
                 .getUserListByPage(firstPage, REST_FULL_API_KEY)
                 .shouldHave(statusCode(200))
-                .responseAsList("data", DataItem.class);
+                .responseAs(GetUsersListResponseModel.class);
 
-        DataItem dataItemResponse =
-                getDataItem.stream().filter(email -> email.getEmail().equals(BASE_georgeBluthEmail)).findAny().get();
+        GetUsersListResponseModel expectedResponse =
+                readModelFromFile(firstPageFilePath,
+                        GetUsersListResponseModel.class);
 
-        Assert.assertEquals(dataItemResponse.getEmail(), BASE_georgeBluthEmail);
+        Assert.assertEquals(
+                actualResponse,
+                expectedResponse,
+                "API response model does not match expected model from file"
+        );
+    }
+    @Test
+    public void getUserListSecondPageAndCheckWithJsonFileAndExceptions() throws Exception {
+        GetUsersListResponseModel actualResponse = userControllerService
+                .getUserListByPage(secondPage, REST_FULL_API_KEY)
+                .shouldHave(statusCode(200))
+                .responseAs(GetUsersListResponseModel.class);
+
+        GetUsersListResponseModel expectedResponse =
+                readModelFromFile(secondPageFilePath,
+                        GetUsersListResponseModel.class);
+
+        Assert.assertEquals(
+                actualResponse,
+                expectedResponse,
+                "API response model does not match expected model from file"
+        );
+    }
+
+    @Test(dataProvider = "userPages")
+    void getUserListAllPagesAndCheckWithJsonFileAndDataProvider(int page, String expectedFilePath) throws IOException {
+        GetUsersListResponseModel actualResponse = userControllerService
+                .getUserListByPage(page, REST_FULL_API_KEY)
+                .shouldHave(statusCode(200))
+                .responseAs(GetUsersListResponseModel.class);
+
+        GetUsersListResponseModel expectedResponse =
+                readModelFromFile(expectedFilePath, GetUsersListResponseModel.class);
+
+        Assert.assertEquals(
+                actualResponse,
+                expectedResponse,
+                "API response for page " + page + " does not match expected model from file"
+        );
     }
 
     @Test
-    void getUserListFirstPageAndCheckWithFile(){
-        // create test to check user list from PDF, XML or JSON file
+    void getUserListAndCheckSpecificEmailInApiAndFileOnAnyPage() throws IOException {
+        String targetEmail = BASE_georgeEdwardsEmail;
+
+        // reuse your (page, filePath) pairs
+        Object[][] pagesAndFiles = userPages();
+
+        boolean emailMatchesOnSomePage = false;
+        List<String> checkedPages = new ArrayList<>();
+
+        for (Object[] row : pagesAndFiles) {
+            int page = (Integer) row[0];
+            String expectedFilePath = (String) row[1];
+
+            checkedPages.add("page " + page + " (file: " + expectedFilePath + ")");
+
+            GetUsersListResponseModel actualResponse = userControllerService
+                    .getUserListByPage(page, REST_FULL_API_KEY)
+                    .shouldHave(statusCode(200))
+                    .responseAs(GetUsersListResponseModel.class);
+
+            boolean emailInApi = actualResponse.getData().stream()
+                    .anyMatch(user -> targetEmail.equals(user.getEmail()));
+
+            GetUsersListResponseModel expectedResponse =
+                    readModelFromFile(expectedFilePath, GetUsersListResponseModel.class);
+
+            boolean emailInFile = expectedResponse.getData().stream()
+                    .anyMatch(user -> targetEmail.equals(user.getEmail()));
+
+            if (emailInApi && emailInFile) {
+                emailMatchesOnSomePage = true;
+                break;
+            }
+        }
+
+        Assert.assertTrue(
+                emailMatchesOnSomePage,
+                "Email " + targetEmail +
+                        " was not found in BOTH API response and file on any page. Checked:" +
+                        checkedPages
+        );
     }
 
+    @Test
+    void getUserListAndCheckSpecificUserIdInApiAndFileOnAnyPage() throws IOException {
+        int targetUserId = BASE_michaelLawsonId;
+
+        Object[][] pagesAndFiles = userPages();
+
+        boolean userIdMatchesOnSomePage = false;
+        List<String> checkedPages = new ArrayList<>();
+
+        for (Object[] row : pagesAndFiles) {
+            int page = (Integer) row[0];
+            String expectedFilePath = (String) row[1];
+
+            checkedPages.add("page " + page + " (file: " + expectedFilePath + ")");
+
+            GetUsersListResponseModel actualResponse = userControllerService
+                    .getUserListByPage(page, REST_FULL_API_KEY)
+                    .shouldHave(statusCode(200))
+                    .responseAs(GetUsersListResponseModel.class);
+
+            boolean idInApi = actualResponse.getData().stream()
+                    .anyMatch(user -> user.getId() == targetUserId);
+
+            GetUsersListResponseModel expectedResponse =
+                    readModelFromFile(expectedFilePath, GetUsersListResponseModel.class);
+
+            boolean idInFile = expectedResponse.getData().stream()
+                    .anyMatch(user -> user.getId() == targetUserId);
+
+            if (idInApi && idInFile) {
+                userIdMatchesOnSomePage = true;
+                break;
+            }
+        }
+
+        Assert.assertTrue(
+                userIdMatchesOnSomePage,
+                "User id " + targetUserId +
+                        " was not found in BOTH API response and file on any page. Checked: " +
+                        String.join(", ", checkedPages)
+        );
+    }
+
+
+    @Test
+    void getUserListAndCheckSpecificUserIdInApiAndFileOnAnyPageWithHashMap() throws IOException {
+        int targetUserId = BASE_michaelLawsonId;
+
+        Map<Integer, String> pagesAndFiles = new LinkedHashMap<>();
+        pagesAndFiles.put(firstPage, firstPageFilePath);
+        pagesAndFiles.put(secondPage, secondPageFilePath);
+
+        boolean userIdMatchesOnSomePage = false;
+
+        for (Map.Entry<Integer, String> entry : pagesAndFiles.entrySet()) {
+            int page = entry.getKey();
+            String expectedFilePath = entry.getValue();
+
+            GetUsersListResponseModel actualResponse = userControllerService
+                    .getUserListByPage(page, REST_FULL_API_KEY)
+                    .shouldHave(statusCode(200))
+                    .responseAs(GetUsersListResponseModel.class);
+
+            boolean idInApi = actualResponse.getData().stream()
+                    .anyMatch(user -> user.getId() == targetUserId);
+
+            GetUsersListResponseModel expectedResponse =
+                    readModelFromFile(expectedFilePath, GetUsersListResponseModel.class);
+
+            boolean idInFile = expectedResponse.getData().stream()
+                    .anyMatch(user -> user.getId() == targetUserId);
+
+            if (idInApi && idInFile) {
+                userIdMatchesOnSomePage = true;
+                break;
+            }
+        }
+
+        String checkedPages = pagesAndFiles.entrySet().stream()
+                .map(e -> "page " + e.getKey() + " (file: " + e.getValue() + ")")
+                .collect(Collectors.joining(", "));
+
+        Assert.assertTrue(
+                userIdMatchesOnSomePage,
+                "User id " + targetUserId +
+                        " was not found in BOTH API response and file on any page. Checked: " +
+                        checkedPages
+        );
+    }
+
+    @Test
+    void sdgsgasg(){
+        // create next project with JUnit
+    }
+
+    private <T> T readModelFromFile(String filePath, Class<T> clazz) throws IOException {
+        Path path = Paths.get(filePath);
+        return mapper.readValue(path.toFile(), clazz);
+    }
 }

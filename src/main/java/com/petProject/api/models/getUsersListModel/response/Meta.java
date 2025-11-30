@@ -6,12 +6,11 @@ import lombok.experimental.Accessors;
 
 import java.util.List;
 
-@Getter
-@Setter
-@ToString
+
 @NoArgsConstructor
 @Accessors(chain = true)
 @AllArgsConstructor
+@Data
 public class Meta{
 
 	@JsonProperty("docs_url")

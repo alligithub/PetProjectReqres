@@ -6,12 +6,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import lombok.experimental.Accessors;
 
-@Getter
-@Setter
-@ToString
+
 @NoArgsConstructor
 @Accessors(chain = true)
 @AllArgsConstructor
+@Data
 public class GetUsersListResponseModel {
 
     @JsonProperty("per_page")
