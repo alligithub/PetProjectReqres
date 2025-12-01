@@ -8,9 +8,8 @@ import lombok.experimental.Accessors;
 @NoArgsConstructor
 @Accessors(chain = true)
 @AllArgsConstructor
-@Data
-//@JsonInclude(JsonInclude.Include.NON_NULL)
-public class DataItem{
+@lombok.Data
+public class Data {
 
     @JsonProperty("last_name")
     private String lastName;

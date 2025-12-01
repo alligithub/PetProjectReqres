@@ -2,6 +2,7 @@ package com.petProject.api.models.getUsersListModel.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
+import lombok.Data;
 import lombok.experimental.Accessors;
 
 

@@ -2,7 +2,7 @@ package com.petProject.api.test.getUserController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petProject.api.asserts.getUserListAssert.GetUserListAssert;
-import com.petProject.api.models.getUsersListModel.response.DataItem;
+import com.petProject.api.models.getUsersListModel.response.Data;
 import com.petProject.api.models.getUsersListModel.response.GetUsersListResponseModel;
 import com.petProject.api.services.userControllerServices.UserControllerService;
 import org.testng.Assert;
@@ -27,7 +27,6 @@ import static org.hamcrest.Matchers.*;
 
 public class GetUserListTest {
 
-    private String usersListDirectory = "src/main/java/com/petProject/resources/baselines/";
     private int firstPage = 1;
     private String firstPageFilePath = usersListDirectory + "users_page1.json";
     private int secondPage = 2;
@@ -63,7 +62,16 @@ public class GetUserListTest {
         userControllerService
                 .getUserListByPage(firstPage, "")
                 .shouldHave(statusCode(401),
-                        bodyField("error", containsString("Missing API key")));
+                        bodyField("error", containsString("api_key_required")));
+    }
+
+    @Test
+    void getUserListFirstPageWithInvalidToken() {
+
+        userControllerService
+                .getUserListByPage(firstPage, "12345")
+                .shouldHave(statusCode(403),
+                        bodyField("error", containsString("invalid_api_key")));
     }
 
     @Test
@@ -80,15 +88,15 @@ public class GetUserListTest {
     @Test
     void getUserListFirstPageAndCheckWithStreamPath() {
 
-        List<DataItem> getDataItem = userControllerService
+        List<Data> getData = userControllerService
                 .getUserListByPage(firstPage, REST_FULL_API_KEY)
                 .shouldHave(statusCode(200))
-                .responseAsList("data", DataItem.class);
+                .responseAsList("data", Data.class);
 
-        DataItem dataItemResponse =
-                getDataItem.stream().filter(email -> email.getEmail().equals(BASE_georgeBluthEmail)).findAny().get();
+        Data dataResponse =
+                getData.stream().filter(email -> email.getEmail().equals(BASE_georgeBluthEmail)).findAny().get();
 
-        Assert.assertEquals(dataItemResponse.getEmail(), BASE_georgeBluthEmail);
+        Assert.assertEquals(dataResponse.getEmail(), BASE_georgeBluthEmail);
     }
 
     @Test
@@ -99,10 +107,10 @@ public class GetUserListTest {
                 .shouldHave(statusCode(200))
                 .responseAs(GetUsersListResponseModel.class);
 
-        DataItem dataItemResponse =
+        Data dataResponse =
                 getUsersListResponseModel.getData().stream().filter(email -> email.getEmail().equals(BASE_georgeBluthEmail)).findAny().get();
 
-        Assert.assertEquals(dataItemResponse.getEmail(), BASE_georgeBluthEmail);
+        Assert.assertEquals(dataResponse.getEmail(), BASE_georgeBluthEmail);
     }
 
     @Test
@@ -113,10 +121,10 @@ public class GetUserListTest {
                 .shouldHave(statusCode(200))
                 .responseAs(GetUsersListResponseModel.class);
 
-        DataItem dataItemResponse =
+        Data dataResponse =
                 getUsersListResponseModel.getData().stream().filter(email -> email.getEmail().equals(BASE_georgeEdwardsEmail)).findAny().get();
 
-        Assert.assertEquals(dataItemResponse.getEmail(), BASE_georgeEdwardsEmail);
+        Assert.assertEquals(dataResponse.getEmail(), BASE_georgeEdwardsEmail);
     }
 
     @Test
@@ -127,10 +135,10 @@ public class GetUserListTest {
                 .shouldHave(statusCode(200))
                 .responseAs(GetUsersListResponseModel.class);
 
-        DataItem dataItemResponse =
+        Data dataResponse =
                 getUsersListResponseModel.getData().stream().filter(message -> Integer.toString(message.getId()).equals(String.valueOf(BASE_charlesMorrisId))).findAny().get();
 
-        Assert.assertEquals(dataItemResponse.getFirstName(), BASE_charlesMorrisFirstName);
+        Assert.assertEquals(dataResponse.getFirstName(), BASE_charlesMorrisFirstName);
     }
 
     @Test
@@ -141,10 +149,10 @@ public class GetUserListTest {
                 .shouldHave(statusCode(200))
                 .responseAs(GetUsersListResponseModel.class);
 
-        DataItem dataItemResponse =
+        Data dataResponse =
                 getUsersListResponseModel.getData().stream().filter(message -> Integer.toString(message.getId()).equals(String.valueOf(BASE_georgeEdwardsId))).findAny().get();
 
-        Assert.assertEquals(dataItemResponse.getId(), BASE_georgeEdwardsId);
+        Assert.assertEquals(dataResponse.getId(), BASE_georgeEdwardsId);
     }
 
     @Test
@@ -292,8 +300,7 @@ public class GetUserListTest {
     void getUserListAndCheckSpecificEmailInApiAndFileOnAnyPage() throws IOException {
         String targetEmail = BASE_georgeEdwardsEmail;
 
-        // reuse your (page, filePath) pairs
-        Object[][] pagesAndFiles = userPages();
+        Object[][] pagesAndFiles =  userPages();
 
         boolean emailMatchesOnSomePage = false;
         List<String> checkedPages = new ArrayList<>();

@@ -10,7 +10,7 @@ import lombok.experimental.Accessors;
 @NoArgsConstructor
 @Accessors(chain = true)
 @AllArgsConstructor
-@Data
+@lombok.Data
 public class GetUsersListResponseModel {
 
     @JsonProperty("per_page")
@@ -20,7 +20,7 @@ public class GetUsersListResponseModel {
     private int total;
 
     @JsonProperty("data")
-    private List<DataItem> data;
+    private List<Data> data;
 
     @JsonProperty("page")
     private int page;

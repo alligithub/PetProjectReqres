@@ -11,7 +11,7 @@ public class UserControllerService extends SetupApiService {
 
     public AssertableResponse getUserListByPage(int page, String token) {
         Response response =
-                setXApiKeyHeader(REST_FULL_API_KEY)
+                setXApiKeyHeader()
                         .when()
                         .get("/users?page="+ page)
                         .then()
@@ -21,9 +21,9 @@ public class UserControllerService extends SetupApiService {
         return new AssertableResponse(response);
     }
 
-    public AssertableResponse getUserListById(int userId, String token) {
+    public AssertableResponse getUserById(int userId, String token) {
         Response response =
-                setXApiKeyHeader(REST_FULL_API_KEY)
+                setXApiKeyHeader()
                         .when()
                         .get("/users/"+ userId)
                         .then()
