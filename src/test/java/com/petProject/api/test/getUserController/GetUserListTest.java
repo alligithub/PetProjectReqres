@@ -27,11 +27,11 @@ import static org.hamcrest.Matchers.*;
 
 public class GetUserListTest {
 
-    private String baseDirectory = "src/main/java/com/petProject/resources/baselines/";
+    private String usersListDirectory = "src/main/java/com/petProject/resources/baselines/";
     private int firstPage = 1;
-    private String firstPageFilePath = baseDirectory + "users_page1.json";
+    private String firstPageFilePath = usersListDirectory + "users_page1.json";
     private int secondPage = 2;
-    private String secondPageFilePath = baseDirectory + "users_page2.json";
+    private String secondPageFilePath = usersListDirectory + "users_page2.json";
 
     private UserControllerService userControllerService = new UserControllerService();
     private GetUserListAssert getUserListAssert = new GetUserListAssert();
@@ -420,11 +420,6 @@ public class GetUserListTest {
                         " was not found in BOTH API response and file on any page. Checked: " +
                         checkedPages
         );
-    }
-
-    @Test
-    void sdgsgasg(){
-        // create next project with JUnit
     }
 
     private <T> T readModelFromFile(String filePath, Class<T> clazz) throws IOException {

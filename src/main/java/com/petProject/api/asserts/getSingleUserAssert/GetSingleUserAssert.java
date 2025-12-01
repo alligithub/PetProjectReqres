@@ -14,10 +14,10 @@ public class GetSingleUserAssert {
         SoftAssert softAssert = new SoftAssert();
 
         softAssert.assertEquals(getSingleUserResponseModel.getData().getId(), userId);
-        softAssert.assertEquals(getSingleUserResponseModel.getData().getEmail(), userId);
-        softAssert.assertEquals(getSingleUserResponseModel.getData().getFirstName(), userId);
-        softAssert.assertEquals(getSingleUserResponseModel.getData().getLastName(), userId);
-        softAssert.assertEquals(getSingleUserResponseModel.getData().getAvatar(), userId);
+        softAssert.assertEquals(getSingleUserResponseModel.getData().getEmail(), BASE_georgeEdwardsEmail);
+        softAssert.assertEquals(getSingleUserResponseModel.getData().getFirst_name(), BASE_georgeEdwardsFirstName);
+        softAssert.assertEquals(getSingleUserResponseModel.getData().getLast_name(), BASE_georgeEdwardsLastName);
+        softAssert.assertEquals(getSingleUserResponseModel.getData().getAvatar(), BASE_georgeEdwardsAvatar);
 
         softAssert.assertEquals(getSingleUserResponseModel.getSupport().getUrl(), BASE_supportUrl);
         softAssert.assertEquals(getSingleUserResponseModel.getSupport().getText(), BASE_supportText);

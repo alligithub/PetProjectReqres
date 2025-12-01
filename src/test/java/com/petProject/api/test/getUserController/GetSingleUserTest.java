@@ -2,7 +2,6 @@ package com.petProject.api.test.getUserController;
 
 import com.petProject.api.asserts.getSingleUserAssert.GetSingleUserAssert;
 import com.petProject.api.models.getSingleUserModel.response.GetSingleUserResponseModel;
-import com.petProject.api.models.getUsersListModel.response.GetUsersListResponseModel;
 import com.petProject.api.services.userControllerServices.UserControllerService;
 import org.testng.annotations.Test;
 
@@ -19,13 +18,16 @@ public class GetSingleUserTest {
 
     @Test
     void getSingleUserAndCheckWithAssertToClass() {
+        // check with randomizer from 1 to 12 id's range
+        // check with dataProvider for each user and compare with JSON file
+        // check with HashMap
 
         GetSingleUserResponseModel getSingleUserResponseModel = userController
                 .getUserListById(userId, REST_FULL_API_KEY)
                 .shouldHave(statusCode(200))
                 .responseAs(GetSingleUserResponseModel.class);
 
-//        getSingleUserAssert.getSingleUserAssert(userId, getSingleUserResponseModel);
+        getSingleUserAssert.getSingleUserAssert(userId, getSingleUserResponseModel);
 
     }
 }
