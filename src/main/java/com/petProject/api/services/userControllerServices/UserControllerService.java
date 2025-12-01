@@ -1,6 +1,7 @@
 package com.petProject.api.services.userControllerServices;
 
 import com.petProject.api.AssertableResponse;
+import com.petProject.api.models.postUserModel.request.PostUserRequestModel;
 import com.petProject.api.services.SetupApiService;
 import io.restassured.response.Response;
 
@@ -11,7 +12,7 @@ public class UserControllerService extends SetupApiService {
 
     public AssertableResponse getUserListByPage(int page, String token) {
         Response response =
-                setXApiKeyHeader()
+                setXApiKeyHeader(token)
                         .when()
                         .get("/users?page="+ page)
                         .then()
@@ -23,9 +24,22 @@ public class UserControllerService extends SetupApiService {
 
     public AssertableResponse getUserById(int userId, String token) {
         Response response =
-                setXApiKeyHeader()
+                setXApiKeyHeader(token)
                         .when()
                         .get("/users/"+ userId)
+                        .then()
+                        .extract()
+                        .response();
+
+        return new AssertableResponse(response);
+    }
+
+    public AssertableResponse postUser(PostUserRequestModel postUserRequestModel, String token) {
+        Response response =
+                setXApiKeyHeader(token)
+                        .when()
+                        .body(postUserRequestModel)
+                        .post("/users")
                         .then()
                         .extract()
                         .response();

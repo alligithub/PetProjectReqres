@@ -1,19 +1,13 @@
 package com.petProject.api.test.getUserController;
 
-import com.petProject.api.AssertableResponse;
-import com.petProject.api.dataProvider.UserDataProvider;
+import com.petProject.api.utilits.dataProvider.UserDataProvider;
 import com.petProject.api.models.getSingleUserModel.response.Data;
 import com.petProject.api.models.getSingleUserModel.response.GetSingleUserResponseModel;
 
-import com.petProject.api.models.getUsersListModel.response.GetUsersListResponseModel;
 import com.petProject.api.properties.BaseUserProperties;
 import com.petProject.api.services.userControllerServices.UserControllerService;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import static com.petProject.api.conditions.Conditions.bodyField;
 import static com.petProject.api.conditions.Conditions.statusCode;

@@ -1,4 +1,4 @@
-package com.petProject.api.dataProvider;
+package com.petProject.api.utilits.dataProvider;
 
 import com.petProject.api.models.getSingleUserModel.response.Data;
 import com.petProject.api.properties.BaseUserProperties;
